@@ -55,7 +55,7 @@ class Wallet {
   }
 
   async update(req: Request, res: Response) {
-    const { spent, earn } = req.body;
+    const { spent, earn, description } = req.body;
     const token = req.headers["token"];
     const user_id = req.headers["id"];
 
@@ -75,19 +75,35 @@ class Wallet {
       }
 
       let total = 0;
+      let data = {
+        value: 0,
+        type: "",
+        description: "",
+        wallet_id: 0,
+      };
 
       if (earn) {
         total = userWallet.total + earn;
+        data.value = earn;
+        data.type = "earn";
       } else if (spent) {
         total = userWallet.total - spent;
+        data.value = spent;
+        data.type = "spent";
       }
 
       const wallet = await knex("wallet")
         .where("id", userWallet.id)
         .update({ total });
 
+      (data.description = description), (data.wallet_id = userWallet.id);
+
+      const log = await knex("log").insert(data);
+
+      const logData = await knex("log").where("id", log).first();
+
       const walletData = await knex("wallet").where("id", wallet).first();
-      return res.status(200).json(walletData);
+      return res.status(200).json({ walletData, logData });
     } catch (error) {
       return res.status(500).send("Ocorreu um erro!");
     }
