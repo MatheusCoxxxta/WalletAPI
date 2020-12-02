@@ -17,7 +17,7 @@ routes.get("/", (req, res) => {
 routes.get("/users", usersController.index);
 routes.get("/users/:id", usersController.show);
 
-routes.post("/users", authController.store);
+routes.post("/signUp", authController.store);
 routes.post("/auth", authController.signIn);
 
 routes.get("/wallet", walletController.show);

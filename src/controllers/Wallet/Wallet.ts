@@ -1,15 +1,21 @@
 import { Request, Response } from "express";
 import knex from "../../database/connection";
+import middleware from "../../middlewares/auth";
 
 class Wallet {
   async show(req: Request, res: Response) {
+    const token = req.headers["token"];
     const user_id = req.headers["id"];
-    if (!user_id) {
-      return res.status(401).json({ message: "Não autorizado!" });
+
+    if ((await middleware(token)) === 401) {
+      return res.status(401).json({
+        message: "Não autorizado!",
+      });
     }
+
     try {
       const wallet = await knex("wallet").where("id", user_id).first();
-      return res.status(200).json({ data: wallet });
+      return res.status(200).json(wallet);
     } catch (error) {
       return res.status(500).send("Ocorreu um erro!");
     }
@@ -17,9 +23,13 @@ class Wallet {
 
   async store(req: Request, res: Response) {
     const { total } = req.body;
+    const token = req.headers["token"];
     const user_id = req.headers["id"];
-    if (!user_id) {
-      return res.status(401).json({ message: "Não autorizado!" });
+
+    if ((await middleware(token)) === 401) {
+      return res.status(401).json({
+        message: "Não autorizado!",
+      });
     }
 
     try {
@@ -38,7 +48,7 @@ class Wallet {
 
       const walletData = await knex("wallet").where("id", wallet).first();
 
-      return res.status(200).json({ data: walletData });
+      return res.status(200).json(walletData);
     } catch (error) {
       return res.status(500).send("Ocorreu um erro!");
     }
@@ -46,10 +56,15 @@ class Wallet {
 
   async update(req: Request, res: Response) {
     const { spent, earn } = req.body;
+    const token = req.headers["token"];
     const user_id = req.headers["id"];
-    if (!user_id) {
-      return res.status(401).json({ message: "Não autorizado!" });
+
+    if ((await middleware(token)) === 401) {
+      return res.status(401).json({
+        message: "Não autorizado!",
+      });
     }
+
     try {
       const userWallet = await knex("wallet").where("user_id", user_id).first();
 
