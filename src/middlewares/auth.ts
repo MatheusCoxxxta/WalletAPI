@@ -1,14 +1,19 @@
-
 import knex from "../database/connection";
 
 async function middleware(token = {}) {
-  let status;
-  const validToken = await knex("token").where("token", token).first();
+  try {
+    let status;
+    const validToken = await knex("token").where("token", token).first();
 
-  if (validToken) status = 200;
-  else status = 401;
+    if (validToken) status = 200;
+    else status = 401;
 
-  return status;
+    return status;
+  } catch (error) {
+    console.log(error)
+  }
+
 }
+
 
 export default middleware
