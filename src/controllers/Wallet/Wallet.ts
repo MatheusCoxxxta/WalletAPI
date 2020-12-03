@@ -1,13 +1,16 @@
 import { Request, Response } from "express";
 import knex from "../../database/connection";
 import middleware from "../../middlewares/auth";
+import getUser from "../../models/auth";
 
 class Wallet {
   async show(req: Request, res: Response) {
     const token = req.headers["token"];
-    const user_id = req.headers["id"];
+    const user_id = await getUser(token)
 
-    if ((await middleware(token)) === 401) {
+    const validToken = await middleware(token)
+
+    if (validToken === 401) {
       return res.status(401).json({
         message: "Não autorizado!",
       });
@@ -24,9 +27,11 @@ class Wallet {
   async store(req: Request, res: Response) {
     const { total } = req.body;
     const token = req.headers["token"];
-    const user_id = req.headers["id"];
+    const user_id = await getUser(token)
 
-    if ((await middleware(token)) === 401) {
+    const validToken = await middleware(token)
+
+    if (validToken === 401) {
       return res.status(401).json({
         message: "Não autorizado!",
       });
@@ -46,6 +51,16 @@ class Wallet {
         total,
       });
 
+      let data = {
+        value: total,
+        type: "earn",
+        description: "Entrada inicial.",
+        wallet_id: wallet,
+      };
+
+      const log = await knex("log").insert(data);
+
+
       const walletData = await knex("wallet").where("id", wallet).first();
 
       return res.status(200).json(walletData);
@@ -57,9 +72,11 @@ class Wallet {
   async update(req: Request, res: Response) {
     const { spent, earn, description } = req.body;
     const token = req.headers["token"];
-    const user_id = req.headers["id"];
+    const user_id = await getUser(token)
 
-    if ((await middleware(token)) === 401) {
+    const validToken = await middleware(token)
+
+    if (validToken === 401) {
       return res.status(401).json({
         message: "Não autorizado!",
       });

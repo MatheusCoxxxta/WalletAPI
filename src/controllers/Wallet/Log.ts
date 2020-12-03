@@ -1,13 +1,16 @@
 import { Request, Response } from "express";
 import knex from "../../database/connection";
 import middleware from "../../middlewares/auth";
+import getUser from "../../models/auth";
 
 class Log {
   async show(req: Request, res: Response) {
     const token = req.headers["token"];
-    const user_id = req.headers["id"];
+    const user_id = await getUser(token)
 
-    if ((await middleware(token)) === 401) {
+    const validToken = await middleware(token)
+
+    if (validToken === 401) {
       return res.status(401).json({
         message: "Não autorizado!",
       });
