@@ -7,6 +7,7 @@ export async function up(knex: Knex) {
     table.decimal("value", 12, 2).notNullable();
     table.string("description").notNullable();
     table.integer("wallet_id").notNullable().references("id").inTable("wallet");
+    table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 }
 

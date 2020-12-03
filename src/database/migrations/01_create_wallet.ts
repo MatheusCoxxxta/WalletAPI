@@ -9,6 +9,7 @@ export async function up(knex: Knex) {
       .references("id")
       .inTable("users");
     table.decimal("total", 12, 2);
+    table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 }
 
